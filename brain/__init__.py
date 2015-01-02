@@ -9,7 +9,7 @@ import random
 __author__ = "Julien Rialland"
 __copyright__ = "Copyright 2015, J.Rialland"
 __license__ = "Apache License 2.0"
-__version__ = "0.1"
+__version__ = "0.2"
 __maintainer__ = __author__
 __email__ = "julien.rialland@gmail.com"
 __status__ = "Production"
