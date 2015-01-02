@@ -14,7 +14,7 @@ from brain import NeuralNetwork
 
 net = NeuralNetwork()
 
-#train the network with the real behavior the the XOR function
+#train the network with the real behavior of the XOR function
 net.train([
     ([0, 0], [0]),
     ([0, 1], [1]),
