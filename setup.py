@@ -3,7 +3,7 @@ from setuptools import setup
 import brain
 
 setup(
-	name='brain',
+	name='pythonbrain',
 	version=brain.__version__,
 	author=brain.__author__,
 	author_email=brain.__email__,
