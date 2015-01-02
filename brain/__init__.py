@@ -4,7 +4,7 @@
 import logging
 import math
 import random
-
+import pickle , zlib, base64
 
 __author__ = "Julien Rialland"
 __copyright__ = "Copyright 2015, J.Rialland"
@@ -110,6 +110,13 @@ class NeuralNetwork:
             input = self.outputs[layer]
             output = input
         return output
+
+    def dump(self):
+        return base64.b64encode(zlib.compress(pickle.dumps(self), 9))
+   
+    @staticmethod
+    def load(s):
+        return pickle.loads(zlib.decompress(base64.b64decode(s)))
 
     def _calculateDeltas(self, target):
         layer = self.outputLayer
