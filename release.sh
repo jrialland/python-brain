@@ -13,10 +13,6 @@ for py in `find ./ -type f -name "*_py3.py"`; do
    3to2-1.0/3to2 -w $py2
 done
 
-for py in `find ./ -type f -name "*_py2.py"; do
-   git commit $py -m"regenerated using 3to2"
-done
-
 #apply autopep8 formatting
 for py in `find ./ -type f -name "*.py"`; do
 	autopep8 -i $py
