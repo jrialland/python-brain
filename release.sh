@@ -1,4 +1,31 @@
 #!/bin/bash
+set -e
+
+if [ ! -d '3to2-1.0' ]; then
+	wget "https://bitbucket.org/amentajo/lib3to2/downloads/3to2-1.0.tar.gz"
+	tar -zxvf 3to2-1.0.tar.gz
+fi
+
+#apply 3to2
+for py in `find ./ -type f -name "*_py3.py"`; do
+   py2=`echo $py | sed -e s/_py3/_py2/`
+   cp $py $py2
+   3to2-1.0/3to2 -w $py2
+done
+
+for py in `find ./ -type f -name "*_py2.py"; do
+   git commit $py -m"regenerated using 3to2"
+done
+
+#apply autopep8 formatting
+for py in `find ./ -type f -name "*.py"`; do
+	autopep8 -i $py
+done
+
+#cleanup temporary files
+find ./ -name "*.pyc" | xargs rm -f
+find ./ -name "*.bak" | xargs rm -f
+find ./ -type d -name "__pycache__" | xargs rm -rf
 
 version=`python << '__eof'
 import brain
