@@ -147,3 +147,20 @@ class NeuralNetwork:
         for err in errors:
             sum += math.pow(err, 2)
         return sum / len(errors)
+
+    def to_function(self, fnname='nn_run'):
+	fn = """
+def {fnname}(i):
+	_ = {weights}
+	o = [i]
+	for l in range(1, {layerCount}):
+		o.append([])
+		for n in range({sizes}[l]):
+			sum = {biases}[l][n]
+			for k in range(len(_[l][n])):
+				sum += _[l][n][k] * i[k]
+			o[-1].append(1 / (1 + math.exp(-sum)))
+		i = o[l]
+	return o[-1]
+""".format(fnname=fnname, layerCount=self.outputLayer+1, weights=repr(self.weights), sizes=repr(self.sizes), biases=repr(self.biases)).replace('\t','    ')
+	return fn
