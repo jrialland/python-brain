@@ -6,7 +6,7 @@ A lightweight pure-python neural network library.
 __author__ = "Julien Rialland"
 __copyright__ = "Copyright 2015, J.Rialland"
 __license__ = "Apache License 2.0"
-__version__ = "0.4"
+__version__ = "0.4.2"
 __maintainer__ = __author__
 __email__ = "julien.rialland@gmail.com"
 __status__ = "Production"
@@ -24,8 +24,6 @@ else:
 
 __all__ = []
 for sym in dir(impl_module):
-	if not sym.startswith('_'):
-		__all__.append(sym)
-		globals()[sym] = getattr(impl_module, sym)
-
-
+    if not sym.startswith('_'):
+        __all__.append(sym)
+        globals()[sym] = getattr(impl_module, sym)
