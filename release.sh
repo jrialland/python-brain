@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+#run unit tests
+PYTHONPATH=$PYTHONPATH:`pwd` python tests/all_tests.py
+if [ $? -ne 0 ]; then
+  echo 'unit tests failed !' >&2
+  exit 1
+fi
+
 if [ ! -d '3to2-1.0' ]; then
 	wget "https://bitbucket.org/amentajo/lib3to2/downloads/3to2-1.0.tar.gz"
 	tar -zxvf 3to2-1.0.tar.gz
