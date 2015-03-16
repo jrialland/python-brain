@@ -90,3 +90,16 @@ If the network failed to train, the error will be above the error threshold. Thi
 
 If the training error is still something huge like `0.4` after 20000 iterations, it's a good sign that the network can't make sense of the data you're giving it.
 
+#### standalone python function generation
+
+the `to_function()` method allow you to generate the code of a python method, in case you want to use the behavior of the neural network without embedding the whole library in your project.
+
+In this case you have off course to train the network first, and then export the code :
+
+```python
+data = ...
+net.train(data)
+
+with file('network.py', 'w') as py:
+    py.write(net.to_function('behave'))
+```
