@@ -101,5 +101,24 @@ data = ...
 net.train(data)
 
 with file('network.py', 'w') as py:
-    py.write(net.to_function('behave'))
+    py.write(net.to_function('compute_xor'))
 ```
+
+will generate a network.py script that contains this function : 
+
+```
+def compute_xor(i):
+    _ = [[], [[-1.3119472186677905, -1.2384811465229646], [-3.4230557744462367, -3.4484088435033957], [-5.9067190819809525, -5.954567420970833], [-0.8994263270628542, -1.0289344868371122]], [[2.1467495993089245, 6.54855247054587, -8.31269196871394, 0.6158671463050152]]]
+    o = [i]
+    for l in range(1, 3):
+        o.append([])
+        for n in range([2, 4, 1][l]):
+            sum = [[], [1.136422369063891, 4.972469523292342, 2.205335929913742, -0.6381812202917794], [-3.654432844073631]][l][n]
+            for k in range(len(_[l][n])):
+                sum += _[l][n][k] * i[k]
+            o[-1].append(1 / (1 + math.exp(-sum)))
+        i = o[l]
+    return o[-1]
+```
+
+This function uses the neural network that was trained, without any dependency to the python-brain library itself, which allows you to include such generated code in your project.
