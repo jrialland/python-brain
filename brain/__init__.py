@@ -6,7 +6,7 @@ A lightweight pure-python neural network library.
 __author__ = "Julien Rialland"
 __copyright__ = "Copyright 2015, J.Rialland"
 __license__ = "Apache License 2.0"
-__version__ = "0.4.2"
+__version__ = "0.4.3"
 __maintainer__ = __author__
 __email__ = "julien.rialland@gmail.com"
 __status__ = "Production"
