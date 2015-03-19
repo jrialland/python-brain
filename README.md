@@ -90,3 +90,34 @@ If the network failed to train, the error will be above the error threshold. Thi
 
 If the training error is still something huge like `0.4` after 20000 iterations, it's a good sign that the network can't make sense of the data you're giving it.
 
+#### standalone python function generation
+
+the `to_function()` method allow you to generate the code of a python method, in case you want to use the behavior of the neural network without embedding the whole library in your project.
+
+In this case you have off course to train the network first, and then export the code :
+
+```python
+data = ...
+net.train(data)
+
+with file('network.py', 'w') as py:
+    py.write(net.to_function('compute_xor'))
+```
+
+will generate a network.py script that contains this function : 
+
+```
+def compute_xor(i):
+    o = [
+        1/(1+math.exp(-3.2388181827226403+2.6977337713267775*i[0]+2.042621270065793*i[1])),
+        1/(1+math.exp(-2.4142567886968656+6.178134001077592*i[0]+6.270888153274187*i[1])),
+        1/(1+math.exp(-2.0431817966844323+1.3249262082065554*i[0]+2.125595453237388*i[1])),
+        1/(1+math.exp(-3.179593662114856+2.2881931900112478*i[0]+2.351635448285368*i[1]))
+    ]
+    i = o
+    return [
+        1/(1+math.exp(4.3766587316428165-4.08295382035833*i[0]+9.355017113411522*i[1]-2.86724287710298*i[2]-3.876097266638394*i[3]))
+    ]
+```
+
+This function uses the neural network that was trained, without any dependency to the python-brain library itself, which allows you to include such generated code in your project.
