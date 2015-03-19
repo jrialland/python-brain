@@ -7,6 +7,7 @@ import pickle
 import zlib
 import base64
 
+
 def flatten(lst):
     for x in lst:
         if isinstance(x, list):
@@ -149,17 +150,17 @@ class NeuralNetwork:
 
     def _indent(self, txt, chars):
         result = ''
-        d= ' '*chars
+        d = ' ' * chars
         for line in txt.split('\n'):
             result += d + line + '\n'
         return result
 
     def to_function(self, fnname='nn_run', indent=0):
-        fn='def {fnname}(i):\n'.format(fnname=fnname)
-        for l in range(1, self.outputLayer+1):
+        fn = 'def {fnname}(i):\n'.format(fnname=fnname)
+        for l in range(1, self.outputLayer + 1):
             if l < self.outputLayer:
                 fn += '    o = [\n'
-            else :
+            else:
                 fn += '    return [\n'
             size = self.sizes[l]
             for n in range(size):
@@ -167,20 +168,23 @@ class NeuralNetwork:
                 length = len(self.weights[l][n])
                 for k in range(length):
                     w = self.weights[l][n][k]
-                    term = term + ('-' if w>0 else '+') + str(abs(w)) + '*i[' + str(k) + ']'
-                fn += '        1/(1+math.exp('+term+'))'+(',' if n != size-1 else '')+'\n'
-            fn +='    ]\n'
+                    term = term + ('-' if w > 0 else '+') + \
+                        str(abs(w)) + '*i[' + str(k) + ']'
+                fn += '        1/(1+math.exp(' + term + '))' + \
+                    (',' if n != size - 1 else '') + '\n'
+            fn += '    ]\n'
             if l != self.outputLayer:
                 fn += '    i = o\n'
         return self._indent(fn, indent)
 
     def to_java_method(self, fnname='nn_run', static=False, scope='protected', indent=4):
-        fn = scope+(' static ' if static else ' ')+'double[] {fnname}(double[] i)'.format(fnname=fnname)+'{\n'
+        fn = scope + (' static ' if static else ' ') + \
+            'double[] {fnname}(double[] i)'.format(fnname=fnname) + '{\n'
         fn += '    double[] o;\n'
-        for l in range(1, self.outputLayer+1):
+        for l in range(1, self.outputLayer + 1):
             if l < self.outputLayer:
                 fn += '    o = new double[]{\n'
-            else :
+            else:
                 fn += '    return new double[]{\n'
             size = self.sizes[l]
             for n in range(size):
@@ -188,45 +192,47 @@ class NeuralNetwork:
                 length = len(self.weights[l][n])
                 for k in range(length):
                     w = self.weights[l][n][k]
-                    term = term + ('-' if w>0 else '+') + str(abs(w)) + '*i[' + str(k) + ']'
-                fn += '        1/(1+Math.exp('+term+'))'+(',' if n != size-1 else '')+'\n'
-            fn +='    };\n'
+                    term = term + ('-' if w > 0 else '+') + \
+                        str(abs(w)) + '*i[' + str(k) + ']'
+                fn += '        1/(1+Math.exp(' + term + '))' + \
+                    (',' if n != size - 1 else '') + '\n'
+            fn += '    };\n'
             if l != self.outputLayer:
                 fn += '    i = o;\n'
-        fn +='}'
+        fn += '}'
         return self._indent(fn, indent)
 
     def to_c_function(self, fnname='nn_run', indent=0):
-        fn = 'void {fnname}(double *i, double *o)'.format(fnname=fnname)+'{\n'
-        terms={}
-        oterms={}
-        lterms=[]
+        fn = 'void {fnname}(double *i, double *o)'.format(fnname=fnname) + \
+            '{\n'
+        terms = {}
+        oterms = {}
+        lterms = []
         for k in range(self.sizes[0]):
-            lterms.append('o0_'+str(k))
-            terms[lterms[-1]] = 'i['+str(k)+']'
-        for l in range(1, self.outputLayer+1):
+            lterms.append('o0_' + str(k))
+            terms[lterms[-1]] = 'i[' + str(k) + ']'
+        for l in range(1, self.outputLayer + 1):
             size = self.sizes[l]
             for n in range(size):
                 term = str(-self.biases[l][n])
                 length = len(self.weights[l][n])
                 for k in range(length):
                     w = self.weights[l][n][k]
-                    term = term + ('-' if w>0 else '+') + str(abs(w)) + '*o'+str(l-1)+'_'+str(k)
-                v = '(1/(1+exp('+term+')))'
+                    term = term + ('-' if w > 0 else '+') + \
+                        str(abs(w)) + '*o' + str(l - 1) + '_' + str(k)
+                v = '(1/(1+exp(' + term + ')))'
                 for k in lterms:
                     v = v.replace(k, terms[k])
-                lterms.append('o'+str(l)+'_'+str(n))
+                lterms.append('o' + str(l) + '_' + str(n))
                 terms[lterms[-1]] = v
                 if l == self.outputLayer:
-                    oterms['o'+str(l)+'_'+str(n)] = 'o['+str(n)+']'
-        #for t in lterms:
+                    oterms['o' + str(l) + '_' + str(n)] = 'o[' + str(n) + ']'
+        # for t in lterms:
         #    if not t in oterms:
         #        fn += '    double '+t+'='+terms[t]+';\n'
         #    else:
         #        fn += '    ' + oterms[t]+' = ' + terms[t]+';\n'
-        for k,v in oterms.items():
+        for k, v in oterms.items():
             fn += '    ' + v + ' = ' + terms[k] + ';\n'
-        fn+='}\n'
+        fn += '}\n'
         return self._indent(fn, indent)
-
-

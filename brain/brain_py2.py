@@ -149,20 +149,93 @@ class NeuralNetwork(object):
             sum += math.pow(err, 2)
         return sum / len(errors)
 
-    def to_function(self, fnname='nn_run'):
-	fn = """
-def {fnname}(i):
-	_ = {weights}
-	o = [i]
-	for l in xrange(1, {layerCount}):
-		o.append([])
-		for n in xrange({sizes}[l]):
-			sum = {biases}[l][n]
-			for k in xrange(len(_[l][n])):
-				sum += _[l][n][k] * i[k]
-			o[-1].append(1 / (1 + math.exp(-sum)))
-		i = o[l]
-	return o[-1]
-""".format(fnname=fnname, layerCount=self.outputLayer+1, weights=repr(self.weights), sizes=repr(self.sizes), biases=repr(self.biases)).replace('\t','    ')
-	return fn
+    def _indent(self, txt, chars):
+        result = u''
+        d = u' ' * chars
+        for line in txt.split(u'\n'):
+            result += d + line + u'\n'
+        return result
 
+    def to_function(self, fnname=u'nn_run', indent=0):
+        fn = u'def {fnname}(i):\n'.format(fnname=fnname)
+        for l in xrange(1, self.outputLayer + 1):
+            if l < self.outputLayer:
+                fn += u'    o = [\n'
+            else:
+                fn += u'    return [\n'
+            size = self.sizes[l]
+            for n in xrange(size):
+                term = unicode(-self.biases[l][n])
+                length = len(self.weights[l][n])
+                for k in xrange(length):
+                    w = self.weights[l][n][k]
+                    term = term + (u'-' if w > 0 else u'+') + \
+                        unicode(abs(w)) + u'*i[' + unicode(k) + u']'
+                fn += u'        1/(1+math.exp(' + term + u'))' + \
+                    (u',' if n != size - 1 else u'') + u'\n'
+            fn += u'    ]\n'
+            if l != self.outputLayer:
+                fn += u'    i = o\n'
+        return self._indent(fn, indent)
+
+    def to_java_method(self, fnname=u'nn_run', static=False, scope=u'protected', indent=4):
+        fn = scope + (u' static ' if static else u' ') + \
+            u'double[] {fnname}(double[] i)'.format(fnname=fnname) + u'{\n'
+        fn += u'    double[] o;\n'
+        for l in xrange(1, self.outputLayer + 1):
+            if l < self.outputLayer:
+                fn += u'    o = new double[]{\n'
+            else:
+                fn += u'    return new double[]{\n'
+            size = self.sizes[l]
+            for n in xrange(size):
+                term = unicode(-self.biases[l][n])
+                length = len(self.weights[l][n])
+                for k in xrange(length):
+                    w = self.weights[l][n][k]
+                    term = term + (u'-' if w > 0 else u'+') + \
+                        unicode(abs(w)) + u'*i[' + unicode(k) + u']'
+                fn += u'        1/(1+Math.exp(' + term + u'))' + \
+                    (u',' if n != size - 1 else u'') + u'\n'
+            fn += u'    };\n'
+            if l != self.outputLayer:
+                fn += u'    i = o;\n'
+        fn += u'}'
+        return self._indent(fn, indent)
+
+    def to_c_function(self, fnname=u'nn_run', indent=0):
+        fn = u'void {fnname}(double *i, double *o)'.format(fnname=fnname) + \
+            u'{\n'
+        terms = {}
+        oterms = {}
+        lterms = []
+        for k in xrange(self.sizes[0]):
+            lterms.append(u'o0_' + unicode(k))
+            terms[lterms[-1]] = u'i[' + unicode(k) + u']'
+        for l in xrange(1, self.outputLayer + 1):
+            size = self.sizes[l]
+            for n in xrange(size):
+                term = unicode(-self.biases[l][n])
+                length = len(self.weights[l][n])
+                for k in xrange(length):
+                    w = self.weights[l][n][k]
+                    term = term + (u'-' if w > 0 else u'+') + \
+                        unicode(abs(w)) + u'*o' + \
+                        unicode(l - 1) + u'_' + unicode(k)
+                v = u'(1/(1+exp(' + term + u')))'
+                for k in lterms:
+                    v = v.replace(k, terms[k])
+                lterms.append(u'o' + unicode(l) + u'_' + unicode(n))
+                terms[lterms[-1]] = v
+                if l == self.outputLayer:
+                    oterms[
+                        u'o' + unicode(l) + u'_' + unicode(n)] = u'o[' + unicode(n) + u']'
+        # for t in lterms:
+        #    if not t in oterms:
+        #        fn += '    double '+t+'='+terms[t]+';\n'
+        #    else:
+        #        fn += '    ' + oterms[t]+' = ' + terms[t]+';\n'
+        for k, v in oterms.items():
+            fn += u'    ' + v + u' = ' + terms[k] + u';\n'
+        fn += u'}\n'
+        return self._indent(fn, indent)
