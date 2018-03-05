@@ -65,7 +65,7 @@ class NeuralNetwork:
             outputSize = len(data[0][1])
         hiddenSizes = self.hiddenSizes
         if not hiddenSizes:
-            hiddenSizes = [math.max(3, math.floor(inputSize / 2))]
+            hiddenSizes = [max(3, math.floor(inputSize / 2))]
         self._initialize(list(flatten([inputSize, hiddenSizes, outputSize])))
         error = 1
         done = 0
